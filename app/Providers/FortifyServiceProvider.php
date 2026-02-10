@@ -13,6 +13,8 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
+    public const REGISTRATION_ENABLED = false;
+
     /**
      * Register any application services.
      */
