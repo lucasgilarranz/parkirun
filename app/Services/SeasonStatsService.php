@@ -75,22 +75,31 @@ class SeasonStatsService
         $raw = $users->map(fn (User $user) => $this->rawStatsForUser($user, $season, $year, $range));
 
         $maxActiveDays = $raw->max('active_days') ?? 0;
-        $maxTotalKm = $raw->max('total_km') ?? 0;
-        $maxAvgDistance = $raw->max('avg_distance') ?? 0;
-        $maxLongestRun = $raw->max('longest_run') ?? 0;
         $maxStreak = $raw->max('longest_streak_days') ?? 0;
+        $maxTotalRatio = $raw->max(fn (array $stats) => $this->ratioAgainstTarget($stats['total_km'], $stats['target_km'])) ?? 0;
+        $maxAvgRatio = $raw->max(fn (array $stats) => $this->ratioAgainstTarget($stats['avg_distance'], $stats['target_km'])) ?? 0;
+        $maxLongestRatio = $raw->max(fn (array $stats) => $this->ratioAgainstTarget($stats['longest_run'], $stats['target_km'])) ?? 0;
 
         $players = $raw->map(function (array $stats) use (
             $maxActiveDays,
-            $maxTotalKm,
-            $maxAvgDistance,
-            $maxLongestRun,
             $maxStreak,
+            $maxTotalRatio,
+            $maxAvgRatio,
+            $maxLongestRatio,
         ) {
             $stats['consistency_score'] = $this->normalize($stats['active_days'], $maxActiveDays);
-            $stats['total_distance_score'] = $this->normalize($stats['total_km'], $maxTotalKm);
-            $stats['avg_distance_score'] = $this->normalize($stats['avg_distance'], $maxAvgDistance);
-            $stats['longest_run_score'] = $this->normalize($stats['longest_run'], $maxLongestRun);
+            $stats['total_distance_score'] = $this->normalize(
+                $this->ratioAgainstTarget($stats['total_km'], $stats['target_km']),
+                $maxTotalRatio,
+            );
+            $stats['avg_distance_score'] = $this->normalize(
+                $this->ratioAgainstTarget($stats['avg_distance'], $stats['target_km']),
+                $maxAvgRatio,
+            );
+            $stats['longest_run_score'] = $this->normalize(
+                $this->ratioAgainstTarget($stats['longest_run'], $stats['target_km']),
+                $maxLongestRatio,
+            );
             $stats['streak_score'] = $this->normalize($stats['longest_streak_days'], $maxStreak);
 
             return $stats;
@@ -197,6 +206,15 @@ class SeasonStatsService
         }
 
         return round(($value / $max) * 100, 2);
+    }
+
+    private function ratioAgainstTarget(float $value, float $target): float
+    {
+        if ($target <= 0) {
+            return 0.0;
+        }
+
+        return $value / $target;
     }
 
     /**
