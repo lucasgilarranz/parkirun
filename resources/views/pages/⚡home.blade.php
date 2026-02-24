@@ -159,7 +159,7 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
                                 <span class="font-semibold">{{ $player['avg_distance'] }} km</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span>Longest streak</span>
+                                <span>Longest streak (2dg)</span>
                                 <span class="font-semibold">{{ $player['longest_streak_days'] }} days</span>
                             </div>
                             <div class="flex items-center justify-between">

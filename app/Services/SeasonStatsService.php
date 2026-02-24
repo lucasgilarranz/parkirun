@@ -124,7 +124,7 @@ class SeasonStatsService
             'Total Distance',
             'Average Distance',
             'Longest Run',
-            'Streak',
+            'Streak (2dg)',
             'Training Density',
         ];
 
