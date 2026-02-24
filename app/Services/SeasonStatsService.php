@@ -43,13 +43,14 @@ class SeasonStatsService
      *         avg_distance: float,
      *         longest_run: float,
      *         longest_streak_days: int,
-     *         active_weeks: int,
-     *         activity_spread_score: float,
+     *         training_density_km_per_week: float,
+     *         training_density_percent: float,
      *         consistency_score: float,
      *         total_distance_score: float,
      *         avg_distance_score: float,
      *         longest_run_score: float,
      *         streak_score: float,
+     *         training_density_score: float,
      *         rank: int
      *     }>,
      *     radar: array{
@@ -79,6 +80,7 @@ class SeasonStatsService
         $maxTotalPercent = $raw->max(fn (array $stats) => $this->percentOfTargetRaw($stats['total_km'], $stats['target_km'])) ?? 0;
         $maxAvgPercent = $raw->max(fn (array $stats) => $this->percentOfTargetRaw($stats['avg_distance'], $stats['target_km'])) ?? 0;
         $maxLongestPercent = $raw->max(fn (array $stats) => $this->percentOfTargetRaw($stats['longest_run'], $stats['target_km'])) ?? 0;
+        $maxTrainingDensityPercent = $raw->max('training_density_percent') ?? 0;
 
         $players = $raw->map(function (array $stats) use (
             $maxActiveDays,
@@ -86,6 +88,7 @@ class SeasonStatsService
             $maxTotalPercent,
             $maxAvgPercent,
             $maxLongestPercent,
+            $maxTrainingDensityPercent,
         ) {
             $stats['consistency_score'] = $this->normalize($stats['active_days'], $maxActiveDays);
             $stats['total_distance_score'] = $this->normalize(
@@ -101,6 +104,10 @@ class SeasonStatsService
                 $maxLongestPercent,
             );
             $stats['streak_score'] = $this->normalize($stats['longest_streak_days'], $maxStreak);
+            $stats['training_density_score'] = $this->normalize(
+                $stats['training_density_percent'],
+                $maxTrainingDensityPercent,
+            );
 
             return $stats;
         });
@@ -118,7 +125,7 @@ class SeasonStatsService
             'Average Distance',
             'Longest Run',
             'Streak',
-            'Activity Spread',
+            'Training Density',
         ];
 
         $radarDatasets = $leaderboard->map(fn (array $stats) => [
@@ -129,7 +136,7 @@ class SeasonStatsService
                 $stats['avg_distance_score'],
                 $stats['longest_run_score'],
                 $stats['streak_score'],
-                $stats['activity_spread_score'],
+                $stats['training_density_score'],
             ],
         ])->values()->all();
 
@@ -158,8 +165,8 @@ class SeasonStatsService
      *     avg_distance: float,
      *     longest_run: float,
      *     longest_streak_days: int,
-     *     active_weeks: int,
-     *     activity_spread_score: float
+     *     training_density_km_per_week: float,
+     *     training_density_percent: float
      * }
      */
     private function rawStatsForUser(User $user, Season $season, int $year, array $range): array
@@ -177,12 +184,13 @@ class SeasonStatsService
             ->values();
 
         $longestStreak = $this->longestStreakDays($activeDays);
-        $activeWeeks = $this->activeWeeksCount($runs);
-        $activitySpread = $this->activitySpreadScore($activeWeeks, $season, $year);
-
         $targetField = $season->targetField();
         $targetKm = (float) ($user->goal?->{$targetField} ?? 0);
         $completion = $targetKm > 0 ? $totalKm / $targetKm : 0.0;
+        $totalWeeks = $this->totalWeeksInSeason($season, $year);
+        $weeklyGoal = $totalWeeks > 0 ? $targetKm / $totalWeeks : 0.0;
+        $weeklyKm = $totalWeeks > 0 ? $totalKm / $totalWeeks : 0.0;
+        $trainingDensityPercent = $weeklyGoal > 0 ? ($weeklyKm / $weeklyGoal) * 100 : 0.0;
 
         return [
             'id' => $user->id,
@@ -195,8 +203,8 @@ class SeasonStatsService
             'avg_distance' => round($avgDistance, 2),
             'longest_run' => round($longestRun, 2),
             'longest_streak_days' => $longestStreak,
-            'active_weeks' => $activeWeeks,
-            'activity_spread_score' => round($activitySpread, 2),
+            'training_density_km_per_week' => round($weeklyKm, 2),
+            'training_density_percent' => round($trainingDensityPercent, 2),
         ];
     }
 
@@ -249,31 +257,14 @@ class SeasonStatsService
         return $longest;
     }
 
-    /**
-     * @param  Collection<int, \App\Models\Run>  $runs
-     */
-    private function activeWeeksCount(Collection $runs): int
-    {
-        return $runs
-            ->pluck('date')
-            ->filter()
-            ->map(fn ($date) => CarbonImmutable::parse($date)->startOfWeek()->toDateString())
-            ->unique()
-            ->count();
-    }
-
-    private function activitySpreadScore(int $activeWeeks, Season $season, int $year): float
+    private function totalWeeksInSeason(Season $season, int $year): int
     {
         $range = $this->seasonRange($season, $year);
         $totalWeeks = $range['start']
             ->startOfWeek()
             ->diffInWeeks($range['end']->startOfWeek()) + 1;
 
-        if ($totalWeeks <= 0) {
-            return 0.0;
-        }
-
-        return ($activeWeeks / $totalWeeks) * 100;
+        return max(0, $totalWeeks);
     }
 
     private function seasonProgress(CarbonImmutable $start, CarbonImmutable $end): float

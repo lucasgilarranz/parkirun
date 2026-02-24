@@ -163,8 +163,8 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
                                 <span class="font-semibold">{{ $player['longest_streak_days'] }} days</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span>Activity spread</span>
-                                <span class="font-semibold">{{ $player['activity_spread_score'] }}%</span>
+                                <span>Training density</span>
+                                <span class="font-semibold">{{ $player['training_density_percent'] }}%</span>
                             </div>
                         </div>
                     </div>
