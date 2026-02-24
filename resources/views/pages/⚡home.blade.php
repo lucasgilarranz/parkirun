@@ -127,7 +127,7 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
             <div class="h-72">
                 <div
                     wire:ignore
-                    x-data="chart({ type: 'radar', data: @js($radarChart), options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } } } })"
+                    x-data="chart({ type: 'radar', data: @js($radarChart), options: { scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(148, 163, 184, 0.2)' }, angleLines: { color: 'rgba(148, 163, 184, 0.5)' } } } } })"
                     x-init="init()"
                     class="h-full"
                 >
