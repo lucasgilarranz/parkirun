@@ -10,12 +10,24 @@
                 <span>ParkiRun</span>
             </a>
             @if (Route::has('login'))
-                <flux:dropdown position="bottom" align="end">
-                    <flux:button variant="subtle">
-                        <flux:icon.bars-3 class="size-5" />
+                <div class="flex items-center gap-2">
+                    <flux:button
+                        variant="subtle"
+                        class="hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                        x-data
+                        x-on:click="$flux.appearance = $flux.appearance === 'dark' ? 'light' : 'dark'"
+                        aria-label="Toggle theme"
+                    >
+                        <flux:icon.sun x-show="$flux.appearance !== 'dark'" class="size-5" />
+                        <flux:icon.moon x-show="$flux.appearance === 'dark'" class="size-5" />
                     </flux:button>
 
-                    <flux:menu>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:button variant="subtle" class="hover:bg-zinc-100 dark:hover:bg-zinc-900">
+                            <flux:icon.bars-3 class="size-5" />
+                        </flux:button>
+
+                        <flux:menu>
                         <flux:menu.item :href="route('home')" wire:navigate>
                             Home
                         </flux:menu.item>
@@ -32,8 +44,9 @@
                                 Log in
                             </flux:menu.item>
                         @endauth
-                    </flux:menu>
-                </flux:dropdown>
+                        </flux:menu>
+                    </flux:dropdown>
+                </div>
             @endif
         </header>
 
