@@ -10,22 +10,30 @@
                 <span>ParkiRun</span>
             </a>
             @if (Route::has('login'))
-                <nav class="flex items-center gap-3 text-sm">
-                    @auth
-                        <flux:button variant="subtle" :href="route('dashboard')" wire:navigate>
-                            Dashboard
-                        </flux:button>
-                    @else
-                        <flux:button variant="subtle" :href="route('login')" wire:navigate>
-                            Log in
-                        </flux:button>
-                        @if (Route::has('register'))
-                            <flux:button variant="primary" :href="route('register')" wire:navigate>
-                                Register
-                            </flux:button>
-                        @endif
-                    @endauth
-                </nav>
+                <flux:dropdown position="bottom" align="end">
+                    <flux:button variant="subtle">
+                        <flux:icon.bars-3 class="size-5" />
+                    </flux:button>
+
+                    <flux:menu>
+                        <flux:menu.item :href="route('home')" wire:navigate>
+                            Home
+                        </flux:menu.item>
+                        <flux:menu.item :href="route('about')" wire:navigate>
+                            About
+                        </flux:menu.item>
+                        <flux:menu.separator />
+                        @auth
+                            <flux:menu.item :href="route('dashboard')" wire:navigate>
+                                Dashboard
+                            </flux:menu.item>
+                        @else
+                            <flux:menu.item :href="route('login')" wire:navigate>
+                                Log in
+                            </flux:menu.item>
+                        @endauth
+                    </flux:menu>
+                </flux:dropdown>
             @endif
         </header>
 
