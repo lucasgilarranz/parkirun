@@ -238,7 +238,7 @@ class SeasonStatsService
         for ($i = 1; $i < $dates->count(); $i++) {
             $diff = $dates[$i - 1]->diffInDays($dates[$i]);
 
-            if ($diff === 1) {
+            if ($diff <= 2) {
                 $current++;
                 $longest = max($longest, $current);
             } else {
