@@ -153,6 +153,11 @@ new #[\Livewire\Attributes\Layout('layouts.app')] class extends Component
                     'barThickness' => 14,
                 ],
             ],
+            'targetLine' => [
+                'value' => $stats['season_progress'],
+                'color' => '#facc15',
+                'width' => 2,
+            ],
         ];
 
         $this->runs = $this->loadRuns($stats['range']['start'], $stats['range']['end']);

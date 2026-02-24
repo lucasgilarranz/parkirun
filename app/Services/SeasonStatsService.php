@@ -137,6 +137,7 @@ class SeasonStatsService
             'season' => $season,
             'year' => $year,
             'range' => $range,
+            'season_progress' => round($this->seasonProgress($range['start'], $range['end']), 2),
             'players' => $leaderboard->values()->all(),
             'radar' => [
                 'labels' => $radarLabels,
@@ -273,5 +274,31 @@ class SeasonStatsService
         }
 
         return ($activeWeeks / $totalWeeks) * 100;
+    }
+
+    private function seasonProgress(CarbonImmutable $start, CarbonImmutable $end): float
+    {
+        if ($end->lessThanOrEqualTo($start)) {
+            return 0.0;
+        }
+
+        $now = CarbonImmutable::now();
+
+        if ($now->lessThanOrEqualTo($start)) {
+            return 0.0;
+        }
+
+        if ($now->greaterThanOrEqualTo($end)) {
+            return 100.0;
+        }
+
+        $elapsed = $start->diffInSeconds($now);
+        $total = $start->diffInSeconds($end);
+
+        if ($total <= 0) {
+            return 0.0;
+        }
+
+        return ($elapsed / $total) * 100;
     }
 }

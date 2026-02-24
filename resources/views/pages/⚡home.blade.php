@@ -33,6 +33,11 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
                     'barThickness' => 14,
                 ],
             ],
+            'targetLine' => [
+                'value' => $stats['season_progress'],
+                'color' => '#facc15',
+                'width' => 2,
+            ],
         ];
 
         $this->radarChart = [
