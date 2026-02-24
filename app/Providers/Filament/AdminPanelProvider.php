@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Back to ParkiRun')
-                    ->url(route('home'))
+                    ->url('/')
                     ->icon('heroicon-o-home'),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
