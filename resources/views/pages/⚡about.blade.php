@@ -33,7 +33,7 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
             <p><strong>Average Distance</strong> highlights typical effort per run.</p>
             <p><strong>Longest Run</strong> captures each runner’s peak distance.</p>
             <p><strong>Streak (2dg)</strong> tracks consistent training with a short 2-day gap (2dg) allowed.</p>
-            <p><strong>Training Density</strong> compares weekly distance to each runner’s goal pace.</p>
+            <p><strong>Training Density</strong> calcualted based on distance covered weekly against the runner's goal pace.</p>
         </div>
     </flux:card>
 </div>
