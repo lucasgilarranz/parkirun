@@ -63,6 +63,68 @@ new #[\Livewire\Attributes\Layout('layouts.public')] class extends Component
 ?>
 
 <div class="flex flex-col gap-6">
+        <flux:card
+            class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            x-data="{
+                deferredPrompt: null,
+                standalone () {
+                    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                },
+                init () {
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        this.deferredPrompt = e;
+                    });
+                },
+                async installOrHelp () {
+                    if (this.standalone()) {
+                        return;
+                    }
+                    if (this.deferredPrompt) {
+                        this.deferredPrompt.prompt();
+                        await this.deferredPrompt.userChoice;
+                        this.deferredPrompt = null;
+
+                        return;
+                    }
+                    this.$dispatch('open-modal', 'install-pwa');
+                },
+            }"
+            x-show="!standalone()"
+            x-cloak
+        >
+            <div>
+                <flux:heading size="sm">Add to your home screen</flux:heading>
+                <flux:text class="mt-1 text-sm text-zinc-500">Open ParkiRun from your phone like a regular app.</flux:text>
+            </div>
+            <flux:button icon="arrow-down-tray" x-on:click="installOrHelp()">
+                Add to home screen
+            </flux:button>
+        </flux:card>
+
+        <flux:modal name="install-pwa" class="max-w-md">
+            <flux:heading size="lg">Add to home screen</flux:heading>
+            <div class="mt-4 space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+                <p>
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">iPhone or iPad:</span>
+                    tap the Share button <span class="whitespace-nowrap">(square with an arrow)</span>, then
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">Add to Home Screen</span>.
+                </p>
+                <p>
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">Android:</span>
+                    open the browser menu (⋮), then choose
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">Install app</span>
+                    or
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">Add to Home screen</span>.
+                </p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <flux:modal.close>
+                    <flux:button variant="primary">Got it</flux:button>
+                </flux:modal.close>
+            </div>
+        </flux:modal>
+
         <flux:card class="space-y-4">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
