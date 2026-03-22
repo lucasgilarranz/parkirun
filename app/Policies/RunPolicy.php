@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Run;
 use App\Models\User;
+use Filament\Facades\Filament;
 
 class RunPolicy
 {
@@ -36,7 +37,8 @@ class RunPolicy
      */
     public function update(User $user, Run $run): bool
     {
-        return $run->user_id === $user->id;
+        return $this->isManagingThroughFilament()
+            || $run->user_id === $user->id;
     }
 
     /**
@@ -44,7 +46,8 @@ class RunPolicy
      */
     public function delete(User $user, Run $run): bool
     {
-        return $run->user_id === $user->id;
+        return $this->isManagingThroughFilament()
+            || $run->user_id === $user->id;
     }
 
     /**
@@ -52,7 +55,8 @@ class RunPolicy
      */
     public function restore(User $user, Run $run): bool
     {
-        return $run->user_id === $user->id;
+        return $this->isManagingThroughFilament()
+            || $run->user_id === $user->id;
     }
 
     /**
@@ -60,6 +64,12 @@ class RunPolicy
      */
     public function forceDelete(User $user, Run $run): bool
     {
-        return $run->user_id === $user->id;
+        return $this->isManagingThroughFilament()
+            || $run->user_id === $user->id;
+    }
+
+    protected function isManagingThroughFilament(): bool
+    {
+        return Filament::getCurrentPanel() !== null;
     }
 }
